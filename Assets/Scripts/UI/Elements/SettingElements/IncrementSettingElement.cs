@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using UnityEngine.UI;
 using UnityEngine;
 using Settings;
@@ -36,26 +36,40 @@ namespace UI
             trigger = rightButton.gameObject.AddComponent<HoldableButton>();
             trigger.OnClick += () => OnButtonPressed(increment: true);
 
-            leftLayout.preferredWidth = rightLayout.preferredWidth = elementWidth;
-            leftLayout.preferredHeight = rightLayout.preferredHeight = elementHeight;
-            base.Setup(setting, style, title, tooltip);
-            leftButton.colors = UIManager.GetThemeColorBlock(style.ThemePanel, "DefaultButton", "");
-            rightButton.colors = UIManager.GetThemeColorBlock(style.ThemePanel, "DefaultButton", "");
-            _valueLabel.color = UIManager.GetThemeColor(style.ThemePanel, "DefaultSetting", "TextColor");
+        leftLayout.preferredWidth = rightLayout.preferredWidth = elementWidth;
+        leftLayout.preferredHeight = rightLayout.preferredHeight = elementHeight;
+        // Prevent value label from stretching/scaling to fit buttons
+        var valueLabelLayout = _valueLabel.GetComponent<LayoutElement>();
+        if (valueLabelLayout != null)
+        {
+            valueLabelLayout.flexibleWidth = 0;
+            valueLabelLayout.minWidth = -1;
+            valueLabelLayout.preferredWidth = -1; // Let label use its preferred width
+        }
+        base.Setup(setting, style, title, tooltip);
+        leftButton.colors = UIManager.GetThemeColorBlock(style.ThemePanel, "DefaultButton", "");
+        rightButton.colors = UIManager.GetThemeColorBlock(style.ThemePanel, "DefaultButton", "");
+        _valueLabel.color = UIManager.GetThemeColor(style.ThemePanel, "DefaultSetting", "TextColor");
         }
 
         protected void OnButtonPressed(bool increment)
         {
             if (_settingType == SettingType.Int)
             {
+                var intSetting = (IntSetting)_setting;
                 if (increment)
-                    ((IntSetting)_setting).Value += 1;
+                {
+                    var a = SettingsManager.AbilitySettings;
+                    if (a.BombRadius.Value + a.BombRange.Value + a.BombSpeed.Value + a.BombCooldown.Value < 20)
+                        intSetting.Value++;
+                }
                 else
-                    ((IntSetting)_setting).Value -= 1;
+                {
+                    intSetting.Value--;
+                }
             }
             UpdateValueLabel();
-            if (_onValueChanged != null)
-                _onValueChanged.Invoke();
+            _onValueChanged?.Invoke();
         }
 
         protected void UpdateValueLabel()

@@ -17,7 +17,7 @@ namespace Effects
         {
             base.Setup(owner, liveTime, settings);
             ParticleSystem particle = GetComponent<ParticleSystem>();
-            if (SettingsManager.AbilitySettings.UseOldEffect.Value)
+            if (SettingsManager.AbilitySettings.OldBombEffect.Value)
             {
                 particle.Stop();
                 particle.Clear();
